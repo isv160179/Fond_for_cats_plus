@@ -1,7 +1,7 @@
 from typing import Union, Optional
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import Boolean, select
+from sqlalchemy import Boolean, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.base import GetAllCreateBase
@@ -61,6 +61,21 @@ class CRUDCharityProject(
         session: AsyncSession,
     ) -> Optional[CharityProject]:
         return await session.get(CharityProject, project_id)
+
+    @staticmethod
+    async def get_projects_by_completion_rate(
+        session: AsyncSession,
+    ) -> list[CharityProject]:
+        projects = await session.scalars(
+            select(CharityProject).where(
+                CharityProject.fully_invested
+            ).order_by(
+                func.julianday(CharityProject.close_date) - func.julianday(
+                    CharityProject.create_date
+                )
+            )
+        )
+        return projects.all()
 
 
 project_crud = CRUDCharityProject(CharityProject)

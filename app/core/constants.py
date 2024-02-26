@@ -90,3 +90,22 @@ DONATION_CREATE_EXAMPLES = {
         }
     }
 }
+DATETIME_FORMAT = '%Y/%m/%d %H:%M:%S'
+GOOGLE_API_NAME_SHEETS = 'sheets'
+GOOGLE_API_VERSION_SHEETS = 'v4'
+GOOGLE_API_NAME_DRIVE = 'drive'
+GOOGLE_API_VERSION_DRIVE = 'v3'
+SPREADSHEET_TITLE = 'Отчёт от'
+LOCATION_FORMAT = 'ru_RU'
+SHEET_TYPE = 'GRID'
+SHEET_ID = 0
+SHEET_TITLE = 'Лист1'
+SHEET_ROWS = 100
+SHEET_COLUMNS = 11
+PERMISSION_TYPE = 'user'
+PERMISSION_ROLE = 'writer'
+TITLE_NAME = 'Топ проектов по скорости закрытия'
+PROJECT_NAME = 'Название проекта'
+PROJECT_DURATION = 'Время сбора'
+PROJECT_DESCRIPTION = 'Описание'
+SHEET_URL = 'https://docs.google.com/spreadsheets/d/{}'
