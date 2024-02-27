@@ -5,23 +5,15 @@ from aiogoogle import Aiogoogle
 from app.core.config import settings
 from app.core.constants import (
     DATETIME_FORMAT,
-    SPREADSHEET_TITLE,
-    LOCATION_FORMAT,
-    SHEET_TYPE,
-    SHEET_ID,
-    SHEET_TITLE,
     SHEET_ROWS,
     SHEET_COLUMNS,
     GOOGLE_API_NAME_SHEETS,
     GOOGLE_API_VERSION_SHEETS,
     GOOGLE_API_NAME_DRIVE,
     GOOGLE_API_VERSION_DRIVE,
-    PERMISSION_ROLE,
-    PERMISSION_TYPE,
-    TITLE_NAME,
-    PROJECT_NAME,
-    PROJECT_DURATION,
-    PROJECT_DESCRIPTION
+    SPREADSHEET_BODY,
+    PERMISSION_BODY,
+    TABLE_VALUES
 )
 from app.models import CharityProject
 
@@ -33,54 +25,35 @@ async def spreadsheets_create(
     service = await wrapper_services.discover(
         GOOGLE_API_NAME_SHEETS,
         GOOGLE_API_VERSION_SHEETS
-
     )
-    spreadsheet_body = {
-        'properties': {
-            'title': SPREADSHEET_TITLE + now_date_time,
-            'locale': LOCATION_FORMAT
-        },
-        'sheets': [{
-            'properties': {
-                'sheetType': SHEET_TYPE,
-                'sheetId': SHEET_ID,
-                'title': SHEET_TITLE,
-                'gridProperties': {
-                    'rowCount': SHEET_ROWS,
-                    'columnCount': SHEET_COLUMNS
-                }
-            }
-        }]
-    }
+    SPREADSHEET_BODY['properties']['title'] += now_date_time
     response = await wrapper_services.as_service_account(
-        service.spreadsheets.create(json=spreadsheet_body)
+        service.spreadsheets.create(json=SPREADSHEET_BODY)
     )
-    spreadsheetid = response['spreadsheetId']
-    return spreadsheetid
+    spreadsheet_id = response['spreadsheetId']
+    return spreadsheet_id
 
 
 async def set_user_permissions(
-    spreadsheetid: str,
+    spreadsheet_id: str,
     wrapper_services: Aiogoogle
 ) -> None:
-    permissions_body = {'type': PERMISSION_TYPE,
-                        'role': PERMISSION_ROLE,
-                        'emailAddress': settings.email}
     service = await wrapper_services.discover(
         GOOGLE_API_NAME_DRIVE,
         GOOGLE_API_VERSION_DRIVE
     )
+    PERMISSION_BODY['emailAddress'] = settings.email
     await wrapper_services.as_service_account(
         service.permissions.create(
-            fileId=spreadsheetid,
-            json=permissions_body,
+            fileId=spreadsheet_id,
+            json=PERMISSION_BODY,
             fields='id'
         )
     )
 
 
 async def spreadsheets_update_value(
-    spreadsheetid: str,
+    spreadsheet_id: str,
     charity_projects: list[CharityProject],
     wrapper_services: Aiogoogle
 ) -> None:
@@ -89,11 +62,8 @@ async def spreadsheets_update_value(
         GOOGLE_API_NAME_SHEETS,
         GOOGLE_API_VERSION_SHEETS
     )
-    table_values = [
-        [SPREADSHEET_TITLE, now_date_time],
-        [TITLE_NAME],
-        [PROJECT_NAME, PROJECT_DURATION, PROJECT_DESCRIPTION]
-    ]
+    TABLE_VALUES[0].append(now_date_time)
+
     for project in charity_projects:
         new_row = [
             str(project.name),
@@ -101,15 +71,15 @@ async def spreadsheets_update_value(
             str(project.description)
         ]
         if len(new_row) <= SHEET_ROWS:
-            table_values.append(new_row)
+            TABLE_VALUES.append(new_row)
 
     update_body = {
         'majorDimension': 'ROWS',
-        'values': table_values
+        'values': TABLE_VALUES
     }
     await wrapper_services.as_service_account(
         service.spreadsheets.values.update(
-            spreadsheetId=spreadsheetid,
+            spreadsheetId=spreadsheet_id,
             range=f'R1C1:R{SHEET_ROWS}C{SHEET_COLUMNS}',
             valueInputOption='USER_ENTERED',
             json=update_body

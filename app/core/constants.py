@@ -109,3 +109,29 @@ PROJECT_NAME = 'Название проекта'
 PROJECT_DURATION = 'Время сбора'
 PROJECT_DESCRIPTION = 'Описание'
 SHEET_URL = 'https://docs.google.com/spreadsheets/d/{}'
+SPREADSHEET_BODY = {
+    'properties': {
+        'title': SPREADSHEET_TITLE,
+        'locale': LOCATION_FORMAT
+    },
+    'sheets': [{
+        'properties': {
+            'sheetType': SHEET_TYPE,
+            'sheetId': SHEET_ID,
+            'title': SHEET_TITLE,
+            'gridProperties': {
+                'rowCount': SHEET_ROWS,
+                'columnCount': SHEET_COLUMNS
+            }
+        }
+    }]
+}
+PERMISSION_BODY = {
+    'type': PERMISSION_TYPE,
+    'role': PERMISSION_ROLE,
+}
+TABLE_VALUES = [
+    [SPREADSHEET_TITLE],
+    [TITLE_NAME],
+    [PROJECT_NAME, PROJECT_DURATION, PROJECT_DESCRIPTION]
+]
